@@ -6,6 +6,7 @@ export function useAsync(func, dependencies = []) {
 
     useEffect(() => {
         execute()
+
     }, [execute])
 
     return state;
@@ -27,6 +28,8 @@ function useAsyncInternal(func, dependencies, initialLoading = false) {
 
 
     const execute = useCallback((...params) => {
+
+
         setLoading(true);
 
         return func(...params).then(data => {
