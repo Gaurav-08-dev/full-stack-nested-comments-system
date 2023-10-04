@@ -29,7 +29,6 @@ function useAsyncInternal(func, dependencies, initialLoading = false) {
 
     const execute = useCallback((...params) => {
 
-
         setLoading(true);
 
         return func(...params).then(data => {
@@ -44,6 +43,7 @@ function useAsyncInternal(func, dependencies, initialLoading = false) {
             setLoading(false)
         })
     }, dependencies)
+    
     return { loading, error, value, execute }
 
 }
