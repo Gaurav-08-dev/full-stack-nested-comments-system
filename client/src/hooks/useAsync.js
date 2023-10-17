@@ -6,7 +6,6 @@ export function useAsync(func, dependencies = []) {
 
     useEffect(() => {
         execute()
-
     }, [execute])
 
     return state;

@@ -7,15 +7,17 @@ import CommentList from "./CommentList";
 
 export function Post() {
 
-    const { post, rootComments } = usePost();
+    const { post, rootComments, createLocalComment } = usePost();
 
     const { loading, error, execute: createCommentFn } = useAsyncFn(createComment)
 
     function onCommentCreate(message) {
-        createCommentFn({ postId: post.id, message }).then((comment) => {
-            console.log(comment)
-        })
+        return createCommentFn({ postId: post.id, message }).then(
+            createLocalComment
+        )
     }
+
+   
 
     return <>
         <h1>{post.title}</h1>
@@ -28,7 +30,7 @@ export function Post() {
                 error={error}
                 onSubmit={onCommentCreate}
             />
-            {(rootComments !== null && rootComments.length > 0) && (
+            {(rootComments !== null && rootComments?.length > 0) && (
                 <div className="mt-4">
                     <CommentList comments={rootComments} />
                 </div>
