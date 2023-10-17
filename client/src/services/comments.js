@@ -21,6 +21,13 @@ export function updateComment({ postId, message, id }) {
 }
 
 
-export function deleteComment(){
-    
+export function deleteComment({ postId, id }) {
+
+
+    return makeRequest(`posts/${postId}/comments/${id}`, {
+
+        method: "DELETE",
+
+    })
+
 }

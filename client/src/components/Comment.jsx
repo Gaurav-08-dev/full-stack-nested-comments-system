@@ -6,16 +6,18 @@ import { usePost } from "../contexts/PostContext"
 import CommentList from "./CommentList"
 import CommentForm from "./CommentForm"
 import { useAsyncFn } from "../hooks/useAsync"
-import { createComment, updateComment } from "../services/comments"
+import { createComment, updateComment, deleteComment } from "../services/comments"
 
 const dateFormatter = new Intl.DateTimeFormat(undefined,
     { dateStyle: "medium", timeStyle: "short" }
 )
 const Comment = ({ id, message, user, createdAt }) => {
 
-    const { post, getReplies, createLocalComment, updateLocalComment } = usePost();
+    const { post, getReplies, createLocalComment, updateLocalComment, deleteLocalComment } = usePost();
     const createCommentFn = useAsyncFn(createComment)
     const updateCommentFn = useAsyncFn(updateComment)
+    const deleteCommentFn = useAsyncFn(deleteComment)
+
 
     const childComments = getReplies(id);
     const [areChildrenHidden, setAreChildrenHidden] = useState(true);
@@ -35,13 +37,21 @@ const Comment = ({ id, message, user, createdAt }) => {
 
     function onCommentUpdate(message) {
 
-        console.log("--->", post.id, message, id)
         return updateCommentFn
             .execute({ postId: post.id, message, id })
             .then(comment => {
                 setIsEditing(false)
                 updateLocalComment(id, comment.message)
             })
+    }
+
+
+
+    function onCommentDelete() {
+
+        return deleteCommentFn
+            .execute({ postId: post.id, id })
+            .then((comment) => deleteLocalComment(comment.id))
     }
 
 
@@ -82,8 +92,17 @@ const Comment = ({ id, message, user, createdAt }) => {
                         isActive={isEditing}
                         onClick={() => setIsEditing(prev => !prev)}
                     />
-                    <IconBtn Icon={FaTrash} aria-label="Delete" color="danger" />
+                    <IconBtn
+                        disabled={deleteCommentFn.loading}
+                        Icon={FaTrash}
+                        aria-label="Delete"
+                        color="danger"
+                        onClick={onCommentDelete}
+                    />
                 </div>
+                {deleteCommentFn.error && (
+                    <div className="error-msg mt-1">{deleteCommentFn.error}</div>
+                )}
             </div>
 
             {isReplying && (
