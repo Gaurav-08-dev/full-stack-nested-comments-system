@@ -17,7 +17,7 @@ app.register(cors, {
     credentials: true
 })
 const prisma = new PrismaClient()
-const CURRENT_USER_ID = (await prisma.user.findFirst({ where: { name: "pro" } })).id;
+const CURRENT_USER_ID = (await prisma.user.findFirst({ where: { name: "noobmaster" } })).id;
 
 const COMMENT_SELECT_FIELDS = {
     id: true,
