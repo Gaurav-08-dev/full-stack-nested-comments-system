@@ -1,23 +1,25 @@
 /* eslint-disable react/prop-types */
 import { useState } from "react"
-import { FaEdit, FaHeart, FaReply, FaTrash } from "react-icons/fa"
+import { FaEdit, FaHeart, FaRegHeart, FaReply, FaTrash } from "react-icons/fa"
 import { IconBtn } from "./IconBtn"
 import { usePost } from "../contexts/PostContext"
 import CommentList from "./CommentList"
 import CommentForm from "./CommentForm"
 import { useAsyncFn } from "../hooks/useAsync"
-import { createComment, updateComment, deleteComment } from "../services/comments"
+import { createComment, updateComment, deleteComment, toggleCommentLike } from "../services/comments"
 import { useUser } from "../hooks/useUser"
 
 const dateFormatter = new Intl.DateTimeFormat(undefined,
     { dateStyle: "medium", timeStyle: "short" }
 )
-const Comment = ({ id, message, user, createdAt }) => {
+const Comment = ({ id, message, user, createdAt, likeCount, likedByMe }) => {
 
-    const { post, getReplies, createLocalComment, updateLocalComment, deleteLocalComment } = usePost();
+    const { post, getReplies, createLocalComment, updateLocalComment, deleteLocalComment, toggleLocalCommentLike } = usePost();
     const createCommentFn = useAsyncFn(createComment)
     const updateCommentFn = useAsyncFn(updateComment)
     const deleteCommentFn = useAsyncFn(deleteComment)
+    const toggleCommentLikeFn = useAsyncFn(toggleCommentLike);
+
 
 
     const childComments = getReplies(id);
@@ -47,13 +49,18 @@ const Comment = ({ id, message, user, createdAt }) => {
             })
     }
 
-
-
     function onCommentDelete() {
 
         return deleteCommentFn
             .execute({ postId: post.id, id })
             .then((comment) => deleteLocalComment(comment.id))
+    }
+
+    function onToggleCommentLike() {
+
+        return toggleCommentLikeFn
+            .execute({ id, postId: post.id })
+            .then(({ addLike }) => toggleLocalCommentLike(id, addLike))
     }
 
 
@@ -66,23 +73,24 @@ const Comment = ({ id, message, user, createdAt }) => {
                 </div>
 
 
-                {
-                    isEditing ?
-                        <CommentForm
-                            autoFocus
-                            initialValue={message}
-                            onSubmit={onCommentUpdate}
-                            loading={updateCommentFn.loading}
-                            error={updateCommentFn.error}
-
-                        />
-                        :
-                        <div className="message">{message}</div>
+                {isEditing
+                    ? <CommentForm
+                        autoFocus
+                        initialValue={message}
+                        onSubmit={onCommentUpdate}
+                        loading={updateCommentFn.loading}
+                        error={updateCommentFn.error}
+                    />
+                    : <div className="message">{message}</div>
                 }
 
                 <div className="footer">
-                    <IconBtn Icon={FaHeart} aria-label="Like">
-                        2
+                    <IconBtn
+                        onClick={onToggleCommentLike}
+                        disabled={toggleCommentLikeFn.loading}
+                        Icon={likedByMe ? FaHeart : FaRegHeart}
+                        aria-label={likedByMe ? "Unlike" : "Like"}>
+                        {likeCount}
                     </IconBtn>
                     <IconBtn
                         isActive={isReplying}
